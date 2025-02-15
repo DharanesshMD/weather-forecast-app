@@ -1,0 +1,8 @@
+{
+    "searchPlaceholder": "Ingrese el nombre de la ciudad o el código postal",
+    "searchButton": "Buscar",
+    "error": "Error al obtener los datos del clima",
+    "switchUnit": "Cambiar a {unit}",
+    "favorites": "Favoritos",
+    "offline": "Actualmente estás sin conexión. Por favor, verifica tu conexión a Internet."
+  }

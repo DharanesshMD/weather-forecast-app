@@ -1,0 +1,280 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #8694a1;
+  --foreground: #171717;
+  --primary-color: #0070f3;
+  --secondary-color: #333333;
+  --accent-color: #e2e8f0;
+  --card-background: #ffffff;
+  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --card-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #e4ecff;
+    --foreground: #e2e8f0;
+    --primary-color: #3182ce;
+    --secondary-color: #e2e8f0;
+    --accent-color: #2d3748;
+    --card-background: #2d3748;
+    --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --card-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Geist', Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--secondary-color);
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+p, ul, ol, li {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: var(--primary-color);
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background-color: var(--primary-color);
+  color: var(--card-background);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+button:hover {
+  background-color: #005bbf;
+  box-shadow: var(--card-hover-shadow);
+}
+
+.card {
+  background-color: var(--card-background);
+  border-radius: 0.5rem;
+  box-shadow: var(--card-shadow);
+  padding: 1.5rem;
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--card-hover-shadow);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.grid-item {
+  background-color: var(--card-background);
+  border-radius: 0.5rem;
+  box-shadow: var(--card-shadow);
+  padding: 1.5rem;
+  transition: box-shadow 0.3s ease;
+}
+
+.grid-item:hover {
+  box-shadow: var(--card-hover-shadow);
+}
+
+.loading-indicator {
+  background-color: var(--accent-color);
+  border-radius: 0.5rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.offline-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* The switch - the box around the slider */
+#theme-toggle-button {
+  font-size: 12px; /* Adjusted font size */
+  position: absolute;
+  top: 5rem;
+  right: 100px; /* Adjusted right position */
+  z-index: 10;
+  cursor: pointer;
+  width: 6em; /* Adjusted width */
+}
+
+/* Hide default HTML checkbox */
+#toggle {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+#container,
+#patches,
+#stars,
+#button,
+#sun,
+#moon,
+#cloud {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.25s;
+}
+
+/* night sky background */
+#toggle:checked + svg #container {
+  fill: #2b4360;
+}
+
+/* move button to right when checked */
+#toggle:checked + svg #button {
+  transform: translate(28px, 2.333px);
+}
+
+/* show/hide sun and moon based on checkbox state */
+#sun {
+  opacity: 1;
+}
+
+#toggle:checked + svg #sun {
+  opacity: 0;
+}
+
+#moon {
+  opacity: 0;
+}
+
+#toggle:checked + svg #moon {
+  opacity: 1;
+}
+
+/* show or hide background items on checkbox state */
+#cloud {
+  opacity: 1;
+}
+
+#toggle:checked + svg #cloud {
+  opacity: 0;
+}
+
+#stars {
+  opacity: 0;
+}
+
+#toggle:checked + svg #stars {
+  opacity: 1;
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap'); */
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.animated-title {
+  background-size: 960px auto;
+  animation: backgroundScroll 30s linear infinite;
+}
+
+@keyframes backgroundScroll {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -960px 0;
+  }
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+html {
+  transition: background-color 0.3s ease;
+}
+
+body {
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+/* Dark mode specific colors */
+.dark body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Theme toggle button styles */
+#theme-toggle-button {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+}
+
+#theme-toggle-button svg {
+  transition: transform 0.3s ease;
+}
+
+/* #theme-toggle-button input:checked + svg {
+  transform: rotate(360deg);
+} */
+
