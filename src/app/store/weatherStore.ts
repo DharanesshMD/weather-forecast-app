@@ -69,28 +69,26 @@ export interface ForecastDay {
   };
 }
 
-interface WeatherStore {
-  currentWeather: CurrentWeather | null;
-  forecast: ForecastDay[];  // Changed from Forecast to ForecastDay[]
-  fetchWeather: (location: string) => Promise<void>;
-}
+type TemperatureUnit = 'metric' | 'imperial';
 
 interface WeatherState {
-  currentWeather: CurrentWeather | null;
-  forecast: Forecast | null;
+  currentWeather: any;
+  forecast: {
+    list: ForecastDay[];
+  };
   loading: boolean;
   error: string | null;
-  unit: 'metric' | 'imperial';
+  unit: TemperatureUnit;
   favoriteLocations: string[];
   fetchWeather: (query: string) => Promise<void>;
-  setUnit: (unit: 'metric' | 'imperial') => void;
+  setUnit: (unit: TemperatureUnit) => void;
   addFavorite: (location: string) => void;
   removeFavorite: (location: string) => void;
 }
 
 export const useWeatherStore = create<WeatherState>((set) => ({
   currentWeather: null,
-  forecast: null,
+  forecast: { list: [] },
   loading: false,
   error: null,
   unit: 'metric',
@@ -107,7 +105,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
       set({ loading: false });
     }
   },
-  setUnit: (unit: 'metric' | 'imperial') => set({ unit }),
+  setUnit: (unit) => set({ unit }),
   addFavorite: (location: string) => set((state: WeatherState) => ({ favoriteLocations: [...state.favoriteLocations, location] })),
   removeFavorite: (location: string) => set((state: WeatherState) => ({ favoriteLocations: state.favoriteLocations.filter((loc: string) => loc !== location) })),
 }));

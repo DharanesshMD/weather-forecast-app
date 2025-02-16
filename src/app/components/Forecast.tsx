@@ -32,13 +32,17 @@ interface DailyForecast {
 }
 
 const Forecast = () => {
-  const { forecast } = useWeatherStore();
+  const { forecast, unit } = useWeatherStore();
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
 
   if (!forecast || !forecast.list) return null;
 
   const getWeatherIconUrl = (iconCode: string) => {
     return `http://openweathermap.org/img/wn/${iconCode}@2x.png`;
+  };
+
+  const convertTemperature = (celsius: number): number => {
+    return unit === 'metric' ? celsius : (celsius * 9/5) + 32;
   };
 
   const getDayName = (date: Date, index: number): string => {
@@ -120,9 +124,9 @@ const Forecast = () => {
               </div>
               <div className="grid grid-cols-3 gap-4 text-center max-w-2xl mx-auto mt-4">
                 <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-                  <p className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                    {day.avgTemp.toFixed(1)}°C
-                  </p>
+                <p className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                  {convertTemperature(day.avgTemp).toFixed(1)}°{unit === 'metric' ? 'C' : 'F'}
+                </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Temperature</p>
                 </div>
                 <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm">
@@ -131,7 +135,7 @@ const Forecast = () => {
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Humidity</p>
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm mb-8">
+                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm mb-8 transform translate-x-[175px]">
                   <p className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                     {day.avgWindSpeed.toFixed(1)} m/s
                   </p>

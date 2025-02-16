@@ -1,10 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWeatherStore } from '../store/weatherStore';
+import { debounce } from 'lodash';
+import { RateLimiter } from '../../../utils/ratelimiter';
+
+interface Suggestion {
+  name: string;
+  country: string;
+  state?: string;
+}
 
 const AutoCompleteSearch = () => {
   const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const { fetchWeather } = useWeatherStore();
   const [locationDenied, setLocationDenied] = useState(false);
+  const rateLimiter = React.useMemo(() => new RateLimiter(30, 60000), []); // 30 requests per minute
+  const [isRateLimited, setIsRateLimited] = useState(false);
 
   // Function to get the current location
   const getCurrentLocation = () => {
@@ -96,6 +108,63 @@ const AutoCompleteSearch = () => {
     }
   };
 
+  const fetchSuggestions = async (input: string) => {
+    if (input.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    try {
+      const canMakeRequest = await rateLimiter.checkLimit();
+    if (!canMakeRequest) {
+      setIsRateLimited(true);
+      setTimeout(() => setIsRateLimited(false), 5000); // Reset after 5 seconds
+      return;
+    }
+    
+      const response = await fetch(
+        `http://api.openweathermap.org/geo/1.0/direct?q=${input}&limit=5&appid=${process.env.NEXT_PUBLIC_API_KEY}`
+      );
+      
+      if (!response.ok) throw new Error('Failed to fetch suggestions');
+      
+      const data = await response.json();
+      setSuggestions(data.map((item: any) => ({
+        name: item.name,
+        country: item.country,
+        state: item.state
+      })));
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+      setSuggestions([]);
+    }
+  };
+
+  {isRateLimited && (
+    <div className="absolute -bottom-8 left-0 w-full text-center text-sm text-red-500">
+      Too many requests. Please wait a moment before trying again.
+    </div>
+  )}
+
+  const debouncedFetchSuggestions = useCallback(
+    debounce((input: string) => fetchSuggestions(input), 300),
+    []
+  );
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    setShowSuggestions(true);
+    debouncedFetchSuggestions(value);
+  };
+
+  const handleSuggestionClick = (suggestion: Suggestion) => {
+    setQuery(suggestion.name);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    fetchWeather(suggestion.name);
+  };
+
   return (
     <div>
       <form className="px-4 w-full max-w-[1200px]" onSubmit={handleSearch}>
@@ -130,7 +199,8 @@ const AutoCompleteSearch = () => {
           id="default-search"
           type="search"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleInputChange}
+          onFocus={() => setShowSuggestions(true)}
         />
         <button
           type="submit"
@@ -155,6 +225,25 @@ const AutoCompleteSearch = () => {
         </button>
       </div>
     </form>
+    {/* Suggestions dropdown */}
+    {showSuggestions && suggestions.length > 0 && (
+        <div className="absolute z-10 w-[600px] ml-4 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+          {suggestions.map((suggestion, index) => (
+            <div
+              key={`${suggestion.name}-${index}`}
+              className="px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 flex flex-col"
+              onClick={() => handleSuggestionClick(suggestion)}
+            >
+              <span className="font-medium text-gray-900 dark:text-gray-100">
+                {suggestion.name}
+              </span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {suggestion.state ? `${suggestion.state}, ` : ''}{suggestion.country}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
   </div>
   );
 };
