@@ -5,14 +5,32 @@
 // const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 export const fetchWeather = async (location: string) => {
+  try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/weather?q=${location}&appid=${process.env.NEXT_PUBLIC_API_KEY}&units=metric`
     );
+
     if (!response.ok) {
-      throw new Error('Failed to fetch weather data');
+      const errorData = await response.json();
+      const errorMessage = response.status === 404
+        ? `City "${location}" not found. Please check the spelling and try again.`
+        : response.status === 401
+        ? 'Invalid API key. Please contact support.'
+        : response.status === 429
+        ? 'Too many requests. Please try again later.'
+        : errorData.message || 'Failed to fetch weather data';
+      
+      throw new Error(errorMessage);
     }
+
     return response.json();
-  };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('An unexpected error occurred');
+  }
+};
   
   export const fetchDefaultWeather = async (lat: number, lon: number) => {
     const response = await fetch(

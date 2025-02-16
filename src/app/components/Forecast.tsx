@@ -135,7 +135,7 @@ const Forecast = () => {
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Humidity</p>
                 </div>
-                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow-sm mb-8 transform translate-x-[175px]">
+                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg relative mb-8 sm:transform sm:translate-x-[175px]">
                   <p className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                     {day.avgWindSpeed.toFixed(1)} m/s
                   </p>

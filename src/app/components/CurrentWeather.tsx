@@ -24,8 +24,8 @@ const CurrentWeather = () => {
 
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow space-y-6">
-      <div className="flex justify-between items-start mb-4">
-        <div className="text-center flex-grow" style={{ marginLeft: 108 }}>
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-4">
+        <div className="text-center flex-grow sm:ml-[108px]">
           <div className="flex items-center justify-center">
             <Image
               src={getWeatherIconUrl(currentWeather.weather[0].icon)}
@@ -37,7 +37,7 @@ const CurrentWeather = () => {
               {currentWeather.name}
             </h2>
           </div>
-          <p className="mt-2 text-xl text-gray-600 dark:text-gray-200">
+          <p className="mt-0 mb-5 sm:mt-2 text-xl text-gray-600 dark:text-gray-200">
             {currentWeather.weather[0].description}
           </p>
         </div>
@@ -71,12 +71,12 @@ const CurrentWeather = () => {
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">Humidity</p>
         </div>
-        <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg relative mb-8 transform translate-x-[175px]">
-          <p className="text-xl font-semibold text-gray-600 dark:text-gray-200">
-            {currentWeather.wind.speed} m/s
-          </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Wind Speed</p>
-        </div>
+        <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg relative mb-8 sm:transform sm:translate-x-[175px]">
+  <p className="text-xl font-semibold text-gray-600 dark:text-gray-200">
+    {currentWeather.wind.speed} m/s
+  </p>
+  <p className="text-sm text-gray-600 dark:text-gray-400">Wind Speed</p>
+</div>
       </div>
     </div>
   );

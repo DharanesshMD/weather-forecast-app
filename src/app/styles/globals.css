@@ -161,6 +161,15 @@ button:hover {
   width: 6em; /* Adjusted width */
 }
 
+#theme-toggle {
+  font-size: 12px; /* Adjusted font size */
+  position: absolute;
+  top: 0.8rem;
+  z-index: 10;
+  cursor: pointer;
+  width: 6em; /* Adjusted width */
+}
+
 /* Hide default HTML checkbox */
 #toggle {
   opacity: 0;

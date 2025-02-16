@@ -5,7 +5,11 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        'sm': '640px',
+      },
+    },
   },
   plugins: [
     require('@tailwindcss/forms'),

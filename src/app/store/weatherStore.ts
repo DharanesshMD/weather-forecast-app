@@ -98,9 +98,25 @@ export const useWeatherStore = create<WeatherState>((set) => ({
     try {
       const currentWeather = await fetchWeatherService(query);
       const forecast = await fetchForecast(query);
-      set({ currentWeather, forecast });
-    } catch (error: any) {
-      set({ error: error.message });
+      
+      if (!currentWeather || !forecast) {
+        throw new Error('Failed to fetch weather data');
+      }
+      
+      set({ 
+        currentWeather, 
+        forecast,
+        error: null 
+      });
+    } catch (error) {
+      // Only update the error state, maintain existing weather and forecast data
+      set((state) => ({ 
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+        // Keep the existing currentWeather and forecast
+        currentWeather: state.currentWeather,
+        forecast: state.forecast
+      }));
+      throw error;
     } finally {
       set({ loading: false });
     }
