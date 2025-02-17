@@ -149,7 +149,7 @@ const AutoCompleteSearch = () => {
   const getCityName = async (latitude: number, longitude: number): Promise<string | null> => {
     try {
       const response = await fetch(
-        `http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${process.env.NEXT_PUBLIC_API_KEY}`
+        `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${process.env.NEXT_PUBLIC_API_KEY}`
       );
       if (!response.ok) {
         throw new Error('Failed to get city name from coordinates');
@@ -197,7 +197,7 @@ const AutoCompleteSearch = () => {
     }
     
       const response = await fetch(
-        `http://api.openweathermap.org/geo/1.0/direct?q=${input}&limit=5&appid=${process.env.NEXT_PUBLIC_API_KEY}`
+        `https://api.openweathermap.org/geo/1.0/direct?q=${input}&limit=5&appid=${process.env.NEXT_PUBLIC_API_KEY}`
       );
       
       if (!response.ok) throw new Error('Failed to fetch suggestions');
