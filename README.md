@@ -140,9 +140,8 @@ src/
    ```
 
 5. **Deployment URLs**
-   - Production: [weather-forecast-app.vercel.app](https://weather-forecast-app.vercel.app)
+   - Production: [weather-forecast-app](https://weather-forecast-app-dharanesshmds-projects.vercel.app/)
    - Preview: Generated for each PR
-   - Latest: [Latest Deployment](https://weather-forecast-app-git-main-yourusername.vercel.app)
 
 ### Automatic Deployments
 
