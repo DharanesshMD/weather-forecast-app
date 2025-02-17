@@ -20,6 +20,7 @@ const AutoCompleteSearch = () => {
   const [ipGeolocationLimiter] = useState(() => new RateLimiter(1, 60000));
   const [searchError, setSearchError] = useState<string | null>(null);
   const [showLocationMessage, setShowLocationMessage] = useState(false);
+  const [isIPRateLimited, setIsIPRateLimited] = useState(false);
 
   // Function to get the current location
   const getCurrentLocation = () => {
@@ -60,11 +61,13 @@ const AutoCompleteSearch = () => {
   const getCityByIP = async () => {
     try {
       const canMakeRequest = await ipGeolocationLimiter.checkLimit();
-      if (!canMakeRequest) {
-        console.warn('IP geolocation rate limited, using fallback');
-        fetchWeather('New York');
-        return;
-      }
+    if (!canMakeRequest) {
+      setIsIPRateLimited(true);
+      setTimeout(() => setIsIPRateLimited(false), 5000); // Hide message after 5 seconds
+      console.warn('IP geolocation rate limited, using fallback');
+      fetchWeather('New York');
+      return;
+    }
   
       // Try ipapi.co first
       const response = await fetch('https://ipapi.co/json/');
@@ -190,11 +193,6 @@ const AutoCompleteSearch = () => {
     }
   };
 
-  {isRateLimited && (
-    <div className="absolute -bottom-8 left-0 w-full text-center text-sm text-red-500">
-      Too many requests. Please wait a moment before trying again.
-    </div>
-  )}
 
   const debouncedFetchSuggestions = useCallback(
     debounce((input: string) => fetchSuggestions(input), 300),
@@ -337,11 +335,25 @@ const AutoCompleteSearch = () => {
     Location access was denied. Using IP-based location instead.
   </div>
 )}
+
+{isIPRateLimited && (
+      <div className="px-4 mt-2 text-amber-500 text-sm transition-opacity duration-300">
+        IP geolocation rate limited. Using default location.
+      </div>
+    )}
+
+{isRateLimited && (
+    <div className="px-4 mt-2 text-gray-400 text-sm transition-opacity duration-300">
+      Too many requests. Please wait a moment before trying again.
+    </div>
+  )}
+
     {searchError && (
   <div className="px-4 mt-2 text-red-500 text-sm">
     {searchError}
   </div>
 )}
+
     {/* Suggestions dropdown */}
     {showSuggestions && suggestions.length > 0 && (
         <div className="absolute z-10 w-[300px] sm:w-[600px] ml-4 mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
