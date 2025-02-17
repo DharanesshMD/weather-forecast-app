@@ -14,11 +14,12 @@ const AutoCompleteSearch = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const { fetchWeather } = useWeatherStore();
-  const [locationDenied, setLocationDenied] = useState<boolean>(false);
+  const [isLocationDenied, setLocationDenied] = useState(false);
   const rateLimiter = React.useMemo(() => new RateLimiter(30, 60000), []); // 30 requests per minute
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [ipGeolocationLimiter] = useState(() => new RateLimiter(1, 60000));
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [showLocationMessage, setShowLocationMessage] = useState(false);
 
   // Function to get the current location
   const getCurrentLocation = () => {
@@ -40,8 +41,8 @@ const AutoCompleteSearch = () => {
               getCityByIP();
             });
         },
-        (error) => {
-          console.error('Geolocation error:', error);
+        () => {
+          setLocationDenied(true);
           // Fallback to IP-based location
           getCityByIP();
         },
@@ -108,8 +109,17 @@ const AutoCompleteSearch = () => {
     }
     // Call getCurrentLocation when the component mounts
     getCurrentLocation();
+
+    if (isLocationDenied) {
+      setShowLocationMessage(true);
+      const timer = setTimeout(() => {
+        setShowLocationMessage(false);
+      }, 5000); // 5 seconds
+  
+      return () => clearTimeout(timer);
+    }
     
-  }, [fetchWeather, searchError, getCurrentLocation]);
+  }, [fetchWeather, searchError, isLocationDenied]);
 
   // Function to get city name from coordinates
   const getCityName = async (latitude: number, longitude: number): Promise<string | null> => {
@@ -180,6 +190,12 @@ const AutoCompleteSearch = () => {
     }
   };
 
+  {isRateLimited && (
+    <div className="absolute -bottom-8 left-0 w-full text-center text-sm text-red-500">
+      Too many requests. Please wait a moment before trying again.
+    </div>
+  )}
+
   const debouncedFetchSuggestions = useCallback(
     debounce((input: string) => fetchSuggestions(input), 300),
     []
@@ -198,13 +214,6 @@ const AutoCompleteSearch = () => {
     setShowSuggestions(false);
     fetchWeather(suggestion.name);
   };
-  
-  // And you can use locationDenied in your UI to show an error message:
-  {locationDenied && (
-    <div className="text-red-500 text-sm mt-2">
-      Location access was denied. Please enable location services to use this feature.
-    </div>
-  )}
 
   return (
     <div>
@@ -323,11 +332,11 @@ const AutoCompleteSearch = () => {
         </button>
       </div>
     </form>
-    {isRateLimited && (
-      <div className="absolute -bottom-8 left-0 w-full text-center text-sm text-red-500">
-        Too many requests. Please wait a moment before trying again.
-      </div>
-    )}
+    {showLocationMessage && isLocationDenied && (
+  <div className="px-4 mt-2 text-gray-400 text-sm transition-opacity duration-300">
+    Location access was denied. Using IP-based location instead.
+  </div>
+)}
     {searchError && (
   <div className="px-4 mt-2 text-red-500 text-sm">
     {searchError}
