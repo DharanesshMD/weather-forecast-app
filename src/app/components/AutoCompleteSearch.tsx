@@ -77,7 +77,7 @@ const AutoCompleteSearch = () => {
           fetchWeather(cachedCity);
         } else {
           console.warn('IP geolocation rate limited and no cached location, using default');
-          fetchWeather('New York');
+          fetchWeather(cachedCity);
         }
         return;
       }
