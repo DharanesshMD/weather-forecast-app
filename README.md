@@ -10,7 +10,7 @@ A modern weather application built with Next.js, TypeScript, and React, providin
 - **Responsive Design**: Mobile-first approach with dark/light mode
 - **Offline Support**: Graceful degradation when offline
 - **Rate Limiting**: Smart API usage management
-- **User Preferences**: Temperature unit selection
+- **User Preferences**: Temperature unit selection and Recent Searches
 
 ## 🏗️ Technical Architecture
 
