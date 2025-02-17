@@ -71,7 +71,7 @@ export interface ForecastDay {
 
 type TemperatureUnit = 'metric' | 'imperial';
 
-interface WeatherState {
+export interface WeatherState {
   currentWeather: any;
   forecast: {
     list: ForecastDay[];
@@ -80,6 +80,7 @@ interface WeatherState {
   error: string | null;
   unit: TemperatureUnit;
   favoriteLocations: string[];
+  searchError: string | null;
   fetchWeather: (query: string) => Promise<void>;
   setUnit: (unit: TemperatureUnit) => void;
   addFavorite: (location: string) => void;
@@ -93,6 +94,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
   error: null,
   unit: 'metric',
   favoriteLocations: [],
+  searchError: null,
   fetchWeather: async (query: string) => {
     set({ loading: true, error: null });
     try {

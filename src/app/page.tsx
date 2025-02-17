@@ -5,6 +5,7 @@ import { useWeatherStore } from './store/weatherStore';
 import { fetchDefaultWeather, fetchWeather } from './services/weather';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import gsap from 'gsap';
+import OfflineFallback from './components/OfflineFallback';
 // import { formatTemperature } from '../utils/format';
 
 const AutoCompleteSearch = lazy(() => import('./components/AutoCompleteSearch'));
@@ -68,9 +69,33 @@ const Home = () => {
     }
   }, [isDarkMode]); // Run effect when isDarkMode changes
 
+  useEffect(() => {
+    // Set initial online status
+    setIsOnline(navigator.onLine);
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // GSAP animation
+    const tl = gsap.timeline({ repeat: -1 });
+    tl.to(".animated-title", 30, { backgroundPosition: "-960px 0" });
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      tl.kill(); // Cleanup animation on unmount
+    };
+  }, []);
   // const toggleDarkMode = () => {
   //   setIsDarkMode(!isDarkMode);
   // };
+
+  if (!isOnline) {
+    return <OfflineFallback />;
+  }
 
   return (
     <div className="min-h-screen dark:bg-gray-900 relative">
