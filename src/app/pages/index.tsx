@@ -10,7 +10,7 @@ const Favorites = lazy(() => import('../components/Favorites'));
 const Map = lazy(() => import('../components/Map'));
 
 const Home = () => {
-  const { currentWeather, unit, setUnit } = useWeatherStore();
+  const { unit, setUnit } = useWeatherStore();
   const [isOnline, setIsOnline] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const { t } = useTranslation('common');

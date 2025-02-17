@@ -85,46 +85,46 @@ describe('Weather Store', () => {
     })
 
     it('should handle fetch errors correctly', async () => {
-      const { result } = renderHook(() => useWeatherStore())
-      const errorMessage = 'City not found'
-      
-      // Mock API error
-      ;(fetchWeatherService as jest.Mock).mockRejectedValue(new Error(errorMessage))
-
-      try {
-        await act(async () => {
-          await result.current.fetchWeather('InvalidCity')
-        })
-      } catch (error) {
-        expect(result.current.error).toBe(errorMessage)
-        expect(result.current.loading).toBeFalsy()
-      }
-    })
-
-    it('should maintain existing data on fetch error', async () => {
-      const { result } = renderHook(() => useWeatherStore())
-      
-      // First set some initial data
-      ;(fetchWeatherService as jest.Mock).mockResolvedValueOnce(mockWeatherData)
-      ;(fetchForecast as jest.Mock).mockResolvedValueOnce(mockForecastData)
-
-      await act(async () => {
-        await result.current.fetchWeather('London')
+        const { result } = renderHook(() => useWeatherStore())
+        const errorMessage = 'City not found'
+        
+        // Mock API error
+        ;(fetchWeatherService as jest.Mock).mockRejectedValue(new Error(errorMessage))
+    
+        try {
+          await act(async () => {
+            await result.current.fetchWeather('InvalidCity')
+          })
+        } catch (_) { // Changed error to _ to indicate unused parameter
+          expect(result.current.error).toBe(errorMessage)
+          expect(result.current.loading).toBeFalsy()
+        }
       })
 
-      // Then simulate an error
-      ;(fetchWeatherService as jest.Mock).mockRejectedValueOnce(new Error('Failed'))
-
-      try {
+      it('should maintain existing data on fetch error', async () => {
+        const { result } = renderHook(() => useWeatherStore())
+        
+        // First set some initial data
+        ;(fetchWeatherService as jest.Mock).mockResolvedValueOnce(mockWeatherData)
+        ;(fetchForecast as jest.Mock).mockResolvedValueOnce(mockForecastData)
+    
         await act(async () => {
-          await result.current.fetchWeather('InvalidCity')
+          await result.current.fetchWeather('London')
         })
-      } catch (error) {
-        expect(result.current.currentWeather).toEqual(mockWeatherData)
-        expect(result.current.forecast).toEqual(mockForecastData)
-      }
+    
+        // Then simulate an error
+        ;(fetchWeatherService as jest.Mock).mockRejectedValueOnce(new Error('Failed'))
+    
+        try {
+          await act(async () => {
+            await result.current.fetchWeather('InvalidCity')
+          })
+        } catch (_) { // Changed error to _ to indicate unused parameter
+          expect(result.current.currentWeather).toEqual(mockWeatherData)
+          expect(result.current.forecast).toEqual(mockForecastData)
+        }
+      })
     })
-  })
 
   describe('Temperature Unit Management', () => {
     it('should change temperature unit', () => {

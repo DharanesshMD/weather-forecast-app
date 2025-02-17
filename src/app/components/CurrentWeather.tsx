@@ -3,7 +3,7 @@ import { useWeatherStore } from '../store/weatherStore';
 import Image from 'next/image';
 
 const CurrentWeather = () => {
-  const { currentWeather, forecast, unit, setUnit } = useWeatherStore();
+  const { currentWeather, unit, setUnit } = useWeatherStore();
 
   if (!currentWeather) {
     return null;

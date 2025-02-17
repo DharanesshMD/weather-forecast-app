@@ -72,10 +72,8 @@ export interface ForecastDay {
 type TemperatureUnit = 'metric' | 'imperial';
 
 export interface WeatherState {
-  currentWeather: any;
-  forecast: {
-    list: ForecastDay[];
-  };
+  currentWeather: CurrentWeather | null;
+  forecast: Forecast | null;
   loading: boolean;
   error: string | null;
   unit: TemperatureUnit;

@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-
 const BASE_URL = 'https://api.openweathermap.org/data/2.5';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
@@ -17,7 +16,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       },
     });
     res.status(200).json(response.data);
-  } catch (error) {
+  } catch (err) {
+    // Log the error in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Weather API Error:', err);
+    }
     res.status(500).json({ error: 'Failed to fetch weather data' });
   }
 };

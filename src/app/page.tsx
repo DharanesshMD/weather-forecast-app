@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslation } from 'next-i18next';
-import { useWeatherStore } from './store/weatherStore';
 import { fetchDefaultWeather, fetchWeather } from './services/weather';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import gsap from 'gsap';
@@ -14,7 +13,6 @@ const Forecast = lazy(() => import('./components/Forecast'));
 const Map = lazy(() => import('./components/Map'));
 
 const Home = () => {
-  const { currentWeather } = useWeatherStore();
   const [isOnline, setIsOnline] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const { t } = useTranslation('common');
@@ -58,7 +56,7 @@ const Home = () => {
       window.removeEventListener('online', () => setIsOnline(true));
       window.removeEventListener('offline', () => setIsOnline(false));
     };
-  }, [fetchWeather]);
+  }, []);
 
   useEffect(() => {
     // Set initial dark mode class

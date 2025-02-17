@@ -4,9 +4,16 @@ import Forecast from '@/app/components/Forecast';
 import { useWeatherStore } from '@/app/store/weatherStore';
 
 jest.mock('@/app/store/weatherStore');
+interface MockProps {
+  src: string;
+  alt: string;
+}
+
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />
+  default: ({ src, alt }: MockProps) => (
+    <img src={src} alt={alt} />
+  )
 }));
 
 

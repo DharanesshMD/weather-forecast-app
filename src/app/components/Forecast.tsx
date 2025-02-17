@@ -2,21 +2,6 @@ import React, { useState } from 'react';
 import { useWeatherStore } from '../store/weatherStore';
 import Image from 'next/image';
 
-interface ForecastDay {
-  dt: number;
-  main: {
-    temp: number;
-    humidity: number;
-  };
-  wind: {
-    speed: number;
-  };
-  weather: [{
-    description: string;
-    icon: string;
-  }];
-}
-
 interface DailyForecast {
   [key: string]: {
     date: Date;
