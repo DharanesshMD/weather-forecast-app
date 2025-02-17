@@ -22,8 +22,10 @@ const AutoCompleteSearch = () => {
   const [showLocationMessage, setShowLocationMessage] = useState(false);
   const [isIPRateLimited, setIsIPRateLimited] = useState(false);
   const [cachedCity, setCachedCity] = useState<string | null>(() => {
-    const saved = localStorage.getItem('lastKnownCity');
-    return saved || null;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('lastKnownCity');
+    }
+    return null;
   });
   
 
@@ -70,8 +72,7 @@ const AutoCompleteSearch = () => {
         setIsIPRateLimited(true);
         setTimeout(() => setIsIPRateLimited(false), 5000);
         
-        // Use cached city if available, otherwise fallback to New York
-        if (cachedCity) {
+        if (typeof window !== 'undefined' && cachedCity) {
           console.warn('IP geolocation rate limited, using cached location:', cachedCity);
           fetchWeather(cachedCity);
         } else {
@@ -103,8 +104,9 @@ const AutoCompleteSearch = () => {
   
       const data = await response.json();
     if (data?.city) {
-      // Cache the successfully retrieved city
-      localStorage.setItem('lastKnownCity', data.city);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('lastKnownCity', data.city);
+      }
       setCachedCity(data.city);
       fetchWeather(data.city);
     } else {
