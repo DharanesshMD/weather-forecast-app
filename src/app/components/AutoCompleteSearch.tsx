@@ -21,6 +21,11 @@ const AutoCompleteSearch = () => {
   const [searchError, setSearchError] = useState<string | null>(null);
   const [showLocationMessage, setShowLocationMessage] = useState(false);
   const [isIPRateLimited, setIsIPRateLimited] = useState(false);
+  const [cachedCity, setCachedCity] = useState<string | null>(() => {
+    const saved = localStorage.getItem('lastKnownCity');
+    return saved || null;
+  });
+  
 
   // Function to get the current location
   const getCurrentLocation = () => {
@@ -61,13 +66,20 @@ const AutoCompleteSearch = () => {
   const getCityByIP = async () => {
     try {
       const canMakeRequest = await ipGeolocationLimiter.checkLimit();
-    if (!canMakeRequest) {
-      setIsIPRateLimited(true);
-      setTimeout(() => setIsIPRateLimited(false), 5000); // Hide message after 5 seconds
-      console.warn('IP geolocation rate limited, using fallback');
-      fetchWeather('New York');
-      return;
-    }
+      if (!canMakeRequest) {
+        setIsIPRateLimited(true);
+        setTimeout(() => setIsIPRateLimited(false), 5000);
+        
+        // Use cached city if available, otherwise fallback to New York
+        if (cachedCity) {
+          console.warn('IP geolocation rate limited, using cached location:', cachedCity);
+          fetchWeather(cachedCity);
+        } else {
+          console.warn('IP geolocation rate limited and no cached location, using default');
+          fetchWeather('New York');
+        }
+        return;
+      }
   
       // Try ipapi.co first
       const response = await fetch('https://ipapi.co/json/');
@@ -90,17 +102,24 @@ const AutoCompleteSearch = () => {
       }
   
       const data = await response.json();
-      if (data?.city) {
-        fetchWeather(data.city);
-      } else {
-        console.error('Could not determine city from IP data');
-        fetchWeather('New York');
-      }
-    } catch (error) {
-      console.error('Error getting location by IP:', error);
+    if (data?.city) {
+      // Cache the successfully retrieved city
+      localStorage.setItem('lastKnownCity', data.city);
+      setCachedCity(data.city);
+      fetchWeather(data.city);
+    } else {
+      throw new Error('Could not determine city from IP data');
+    }
+  } catch (error) {
+    console.error('Error getting location by IP:', error);
+    if (cachedCity) {
+      console.warn('Using cached location after error:', cachedCity);
+      fetchWeather(cachedCity);
+    } else {
       fetchWeather('New York');
     }
-  };
+  }
+};
 
   useEffect(() => {
     if (searchError) {
@@ -128,7 +147,7 @@ const AutoCompleteSearch = () => {
   const getCityName = async (latitude: number, longitude: number): Promise<string | null> => {
     try {
       const response = await fetch(
-        `https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${process.env.NEXT_PUBLIC_API_KEY}`
+        `http://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${process.env.NEXT_PUBLIC_API_KEY}`
       );
       if (!response.ok) {
         throw new Error('Failed to get city name from coordinates');
@@ -176,7 +195,7 @@ const AutoCompleteSearch = () => {
     }
     
       const response = await fetch(
-        `https://api.openweathermap.org/geo/1.0/direct?q=${input}&limit=5&appid=${process.env.NEXT_PUBLIC_API_KEY}`
+        `http://api.openweathermap.org/geo/1.0/direct?q=${input}&limit=5&appid=${process.env.NEXT_PUBLIC_API_KEY}`
       );
       
       if (!response.ok) throw new Error('Failed to fetch suggestions');
@@ -336,11 +355,11 @@ const AutoCompleteSearch = () => {
   </div>
 )}
 
-{isIPRateLimited && (
-      <div className="px-4 mt-2 text-amber-500 text-sm transition-opacity duration-300">
-        IP geolocation rate limited. Using default location.
-      </div>
-    )}
+{/* {isIPRateLimited && cachedCity && (
+  <div className="px-4 mt-2 text-amber-500 text-sm transition-opacity duration-300">
+    IP geolocation rate limited. Using last known location: {cachedCity}
+  </div>
+)} */}
 
 {isRateLimited && (
     <div className="px-4 mt-2 text-gray-400 text-sm transition-opacity duration-300">
