@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useWeatherStore } from '../store/weatherStore';
 import { debounce } from 'lodash';
 import { RateLimiter } from '../../../utils/ratelimiter';
-import { error } from 'console';
 
 interface Suggestion {
   name: string;
@@ -206,10 +205,6 @@ const AutoCompleteSearch = () => {
       Location access was denied. Please enable location services to use this feature.
     </div>
   )}
-
-  if (process.env.NODE_ENV === 'development') {
-    console.error('Error fetching suggestions:', error);
-  }
 
   return (
     <div>

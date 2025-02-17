@@ -17,6 +17,11 @@ module.exports = {
   
       // Allow some explicit any usage where necessary
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', { 
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_'
+    }],
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
   
       // Handling React Hooks dependencies
       'react-hooks/exhaustive-deps': 'warn',
