@@ -100,7 +100,7 @@ export const useWeatherStore = create<WeatherState>((set) => ({
       const forecast = await fetchForecast(query);
       
       if (!currentWeather || !forecast) {
-        throw new Error('Failed to fetch weather data');
+        return null
       }
       
       set({ 

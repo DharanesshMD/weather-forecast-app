@@ -5,6 +5,9 @@
 // const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 export const fetchWeather = async (location: string) => {
+  if (!location) {
+    return null; // Return null or an appropriate value to indicate invalid input
+  }
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL}/weather?q=${location}&appid=${process.env.NEXT_PUBLIC_API_KEY}&units=metric`
@@ -47,7 +50,7 @@ export const fetchWeather = async (location: string) => {
       `${process.env.NEXT_PUBLIC_BASE_URL}/forecast?q=${location}&appid=${process.env.NEXT_PUBLIC_API_KEY}&units=metric`
     );
     if (!response.ok) {
-      throw new Error('Failed to fetch forecast data');
+      return null;
     }
     return response.json();
   };

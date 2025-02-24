@@ -5,7 +5,6 @@ import { fetchDefaultWeather, fetchWeather } from './services/weather';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import gsap from 'gsap';
 import OfflineFallback from './components/OfflineFallback';
-// import { formatTemperature } from '../utils/format';
 
 const AutoCompleteSearch = lazy(() => import('./components/AutoCompleteSearch'));
 const CurrentWeather = lazy(() => import('./components/CurrentWeather'));
@@ -14,10 +13,21 @@ const Map = lazy(() => import('./components/Map'));
 
 const Home = () => {
   const [isOnline, setIsOnline] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const { t } = useTranslation('common');
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Initialize isDarkMode based on localStorage value
+    const storedTheme = localStorage.getItem('theme');
+    return storedTheme === 'dark' || storedTheme === null; // Default to dark mode if no theme is stored
+  });
+  // const { t } = useTranslation('common');
 
   useEffect(() => {
+    // Set initial dark mode class based on the initial state
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
     // GSAP animation
     const tl = gsap.timeline({ repeat: -1 });
     tl.to(".animated-title", 30, { backgroundPosition: "-960px 0" });
@@ -25,7 +35,19 @@ const Home = () => {
     return () => {
       tl.kill(); // Cleanup animation on unmount
     };
-  }, []);
+  }, [isDarkMode]);
+
+  useEffect(() => {
+    // Save theme state to localStorage whenever it changes
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+
+    // Set initial dark mode class
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     const fetchDefaultWeatherData = async () => {
@@ -57,39 +79,6 @@ const Home = () => {
       window.removeEventListener('offline', () => setIsOnline(false));
     };
   }, []);
-
-  useEffect(() => {
-    // Set initial dark mode class
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]); // Run effect when isDarkMode changes
-
-  useEffect(() => {
-    // Set initial online status
-    setIsOnline(navigator.onLine);
-
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    // GSAP animation
-    const tl = gsap.timeline({ repeat: -1 });
-    tl.to(".animated-title", 30, { backgroundPosition: "-960px 0" });
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      tl.kill(); // Cleanup animation on unmount
-    };
-  }, []);
-  // const toggleDarkMode = () => {
-  //   setIsDarkMode(!isDarkMode);
-  // };
 
   if (!isOnline) {
     return <OfflineFallback />;
@@ -260,11 +249,11 @@ const Home = () => {
             <Map />
           </Suspense>
         </div>
-        {!isOnline && (
+        {/* {!isOnline && (
           <div className="mt-4 p-4 bg-red-100 border border-red-400 rounded text-red-700">
             {t('offline')}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

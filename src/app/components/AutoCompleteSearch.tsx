@@ -29,6 +29,8 @@ const AutoCompleteSearch = () => {
   const [ipGeolocationLimiter] = useState(() => new RateLimiter(1, 60000));
   const [searchError, setSearchError] = useState<string | null>(null);
   const [showLocationMessage, setShowLocationMessage] = useState(false);
+  const [hasFetchedLocation, setHasFetchedLocation] = useState(false);
+  const [hasShownLocationMessage, setHasShownLocationMessage] = useState(false);
   const [isIPRateLimited, setIsIPRateLimited] = useState(false);
   const [cachedCity, setCachedCity] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
@@ -36,7 +38,6 @@ const AutoCompleteSearch = () => {
     }
     return null;
   });
-  
 
   // Function to get the current location
   const getCurrentLocation = () => {
@@ -44,7 +45,6 @@ const AutoCompleteSearch = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          // Call a function to get city name from coordinates and then fetch weather
           getCityName(latitude, longitude)
             .then((city) => {
               if (city) {
@@ -52,24 +52,20 @@ const AutoCompleteSearch = () => {
                 setLocationDenied(false); // Reset locationDenied state
               }
             })
-            .catch((error) => {
-              console.error('Error getting city name:', error);
+            .catch(() => {
               // If getCityName fails, fallback to IP-based location
               getCityByIP();
             });
         },
         () => {
-          setLocationDenied(true);
-          // Fallback to IP-based location
-          getCityByIP();
+          setLocationDenied(true); // Set locationDenied to true only on geolocation denial
+          getCityByIP(); // Fallback to IP-based location
         },
         { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 }
       );
     } else {
-      console.error('Geolocation is not supported by this browser.');
-      setLocationDenied(true);
-      // Fallback to IP-based location
-      getCityByIP();
+      setLocationDenied(true); // Set locationDenied to true if geolocation is not supported
+      getCityByIP(); // Fallback to IP-based location
     }
   };
 
@@ -82,19 +78,15 @@ const AutoCompleteSearch = () => {
         setTimeout(() => setIsIPRateLimited(false), 5000);
         
         if (typeof window !== 'undefined' && cachedCity) {
-          console.warn('IP geolocation rate limited, using cached location:', cachedCity);
           fetchWeather(cachedCity);
         } else {
-          console.warn('IP geolocation rate limited and no cached location, using default');
           fetchWeather(cachedCity);
         }
         return;
       }
   
-      // Try ipapi.co first
       const response = await fetch('https://ipapi.co/json/');
       if (!response.ok) {
-        // If ipapi fails, try alternative service
         const fallbackResponse = await fetch('https://api.ipify.org?format=json');
         if (!fallbackResponse.ok) {
           throw new Error('Failed to get location by IP');
@@ -112,46 +104,51 @@ const AutoCompleteSearch = () => {
       }
   
       const data = await response.json();
-    if (data?.city) {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('lastKnownCity', data.city);
+      if (data?.city) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('lastKnownCity', data.city);
+        }
+        setCachedCity(data.city);
+        fetchWeather(data.city);
+      } else {
+        throw new Error('Could not determine city from IP data');
       }
-      setCachedCity(data.city);
-      fetchWeather(data.city);
-    } else {
-      throw new Error('Could not determine city from IP data');
+    } catch (error) {
+      if (cachedCity) {
+        fetchWeather(cachedCity);
+      } else {
+        fetchWeather('New York');
+      }
     }
-  } catch (error) {
-    console.error('Error getting location by IP:', error);
-    if (cachedCity) {
-      console.warn('Using cached location after error:', cachedCity);
-      fetchWeather(cachedCity);
-    } else {
-      fetchWeather('New York');
-    }
-  }
-};
+  };
 
   useEffect(() => {
+    // Handle searchError separately and return early
     if (searchError) {
       const timer = setTimeout(() => {
         setSearchError(null);
       }, 10000); // 10 seconds
-
+  
       return () => clearTimeout(timer);
     }
-    // Call getCurrentLocation when the component mounts
-    getCurrentLocation();
-
-    if (isLocationDenied) {
+  
+    // If the location has not been fetched yet, call getCurrentLocation
+    if (!hasFetchedLocation) {
+      getCurrentLocation();
+      setHasFetchedLocation(true); // Mark the location as fetched
+    }
+  
+    // If there is no searchError and location has been denied, show the message
+    if (isLocationDenied && !hasShownLocationMessage) {
       setShowLocationMessage(true);
+      setHasShownLocationMessage(true); // Mark the message as shown
       const timer = setTimeout(() => {
         setShowLocationMessage(false);
       }, 5000); // 5 seconds
   
       return () => clearTimeout(timer);
     }
-
+  
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('recentSearches');
       if (saved) {
@@ -159,11 +156,10 @@ const AutoCompleteSearch = () => {
           const parsed = JSON.parse(saved);
           setRecentSearches(parsed);
         } catch (e) {
-          console.error('Error parsing recent searches:', e);
+          // Error parsing recent searches
         }
       }
     }
-    
   }, [fetchWeather, searchError, isLocationDenied]);
 
   const addToRecentSearches = (locationName: string) => {
@@ -204,7 +200,6 @@ const AutoCompleteSearch = () => {
       }
       return null;
     } catch (error) {
-      console.error('Error fetching city name:', error);
       return null;
     }
   };
@@ -213,19 +208,18 @@ const AutoCompleteSearch = () => {
     e.preventDefault();
     setSearchError(null); // Reset any previous errors
     setShowSuggestions(false); // Hide suggestions on submit
-    
+  
     try {
       await fetchWeather(query);
       addToRecentSearches(query);
     } catch (error) {
-      console.error('Error:', error);
       if (error instanceof Error) {
         setSearchError(error.message);
       } else {
         setSearchError('An unexpected error occurred');
       }
     }
-};
+  };
 
   const fetchSuggestions = async (input: string) => {
     if (input.length < 3) {
@@ -235,11 +229,11 @@ const AutoCompleteSearch = () => {
 
     try {
       const canMakeRequest = await rateLimiter.checkLimit();
-    if (!canMakeRequest) {
-      setIsRateLimited(true);
-      setTimeout(() => setIsRateLimited(false), 5000); // Reset after 5 seconds
-      return;
-    }
+      if (!canMakeRequest) {
+        setIsRateLimited(true);
+        setTimeout(() => setIsRateLimited(false), 5000); // Reset after 5 seconds
+        return;
+      }
     
       const response = await fetch(
         `https://api.openweathermap.org/geo/1.0/direct?q=${input}&limit=5&appid=${process.env.NEXT_PUBLIC_API_KEY}`
@@ -254,11 +248,9 @@ const AutoCompleteSearch = () => {
         state: item.state
       })));
     } catch (error) {
-      console.error('Error fetching suggestions:', error);
       setSuggestions([]);
     }
   };
-
 
   const debouncedFetchSuggestions = useCallback(
     debounce((input: string) => fetchSuggestions(input), 300),
