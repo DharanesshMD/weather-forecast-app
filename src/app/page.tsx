@@ -12,41 +12,34 @@ const Map = lazy(() => import('./components/Map'));
 
 const Home = () => {
   const [isOnline, setIsOnline] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Initialize isDarkMode based on localStorage value
+  const [isDarkMode, setIsDarkMode] = useState(false); // Start with a fixed initial state
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialize theme after mount
+  useEffect(() => {
     const storedTheme = localStorage.getItem('theme');
-    return storedTheme === 'dark' || storedTheme === null; // Default to dark mode if no theme is stored
-  });
-  // const { t } = useTranslation('common');
+    setIsDarkMode(storedTheme === 'dark' || storedTheme === null);
+    setIsInitialized(true);
+  }, []);
 
   useEffect(() => {
-    // Set initial dark mode class based on the initial state
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    // Only update localStorage and classes after initialization
+    if (isInitialized) {
+      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+      document.documentElement.classList.remove('dark', 'light');
+      document.documentElement.classList.add(isDarkMode ? 'dark' : 'light');
     }
+  }, [isDarkMode, isInitialized]);
 
-    // GSAP animation
+  useEffect(() => {
+    // GSAP animation only
     const tl = gsap.timeline({ repeat: -1 });
     tl.to(".animated-title", 30, { backgroundPosition: "-960px 0" });
 
     return () => {
       tl.kill(); // Cleanup animation on unmount
     };
-  }, [isDarkMode]);
-
-  useEffect(() => {
-    // Save theme state to localStorage whenever it changes
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-
-    // Set initial dark mode class
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
+  }, []);
 
   useEffect(() => {
     const fetchDefaultWeatherData = async () => {
