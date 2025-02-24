@@ -12,15 +12,14 @@ const Map = lazy(() => import('./components/Map'));
 
 const Home = () => {
   const [isOnline, setIsOnline] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false); // Initialize with a default value
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Initialize isDarkMode based on localStorage value
+    const storedTheme = localStorage.getItem('theme');
+    return storedTheme === 'dark' || storedTheme === null; // Default to dark mode if no theme is stored
+  });
+  // const { t } = useTranslation('common');
 
   useEffect(() => {
-    // Set initial dark mode based on localStorage value
-    if (typeof window !== 'undefined') {
-      const storedTheme = localStorage.getItem('theme');
-      setIsDarkMode(storedTheme === 'dark' || storedTheme === null); // Default to dark mode if no theme is stored
-    }
-
     // Set initial dark mode class based on the initial state
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -39,9 +38,7 @@ const Home = () => {
 
   useEffect(() => {
     // Save theme state to localStorage whenever it changes
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-    }
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
 
     // Set initial dark mode class
     if (isDarkMode) {
