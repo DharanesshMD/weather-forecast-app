@@ -12,24 +12,24 @@ const Map = lazy(() => import('./components/Map'));
 
 const Home = () => {
   const [isOnline, setIsOnline] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false); // Start with a fixed initial state
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(null); // Start with null to indicate loading
+  const [isLoading, setIsLoading] = useState(true); // Loading state
 
-  // Initialize theme after mount
   useEffect(() => {
+    // Initialize theme after mount
     const storedTheme = localStorage.getItem('theme');
     setIsDarkMode(storedTheme === 'dark' || storedTheme === null);
-    setIsInitialized(true);
+    setIsLoading(false); // Set loading to false once theme is set
   }, []);
 
   useEffect(() => {
     // Only update localStorage and classes after initialization
-    if (isInitialized) {
+    if (isDarkMode !== null) {
       localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
       document.documentElement.classList.remove('dark', 'light');
       document.documentElement.classList.add(isDarkMode ? 'dark' : 'light');
     }
-  }, [isDarkMode, isInitialized]);
+  }, [isDarkMode]);
 
   useEffect(() => {
     // GSAP animation only
@@ -72,10 +72,14 @@ const Home = () => {
     };
   }, []);
 
+  if (isLoading) {
+    // Render a loading state until the theme is set
+    return null; // You can also use a spinner or a loading message if preferred
+  }
+
   if (!isOnline) {
     return <OfflineFallback />;
   }
-
   return (
     <div className="min-h-screen dark:bg-gray-900 relative">
       {/* toggle for pc screen */}

@@ -32,6 +32,8 @@ const AutoCompleteSearch = () => {
   const [hasFetchedLocation, setHasFetchedLocation] = useState(false);
   const [hasShownLocationMessage, setHasShownLocationMessage] = useState(false);
   const [isIPRateLimited, setIsIPRateLimited] = useState(false);
+  const [isFallbackToDefaultCity, setIsFallbackToDefaultCity] = useState(false);
+  const [hasShownFallbackMessage, setHasShownFallbackMessage] = useState(false);
   const [cachedCity, setCachedCity] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('lastKnownCity');
@@ -76,7 +78,7 @@ const AutoCompleteSearch = () => {
       if (!canMakeRequest) {
         setIsIPRateLimited(true);
         setTimeout(() => setIsIPRateLimited(false), 5000);
-        
+  
         if (typeof window !== 'undefined' && cachedCity) {
           fetchWeather(cachedCity);
         } else {
@@ -117,11 +119,15 @@ const AutoCompleteSearch = () => {
       if (cachedCity) {
         fetchWeather(cachedCity);
       } else {
+        // Fallback to "New York"
         fetchWeather('New York');
+        if (!hasShownFallbackMessage) {
+          setIsFallbackToDefaultCity(true); // Show the message
+          setHasShownFallbackMessage(true); // Mark the message as shown
+        }
       }
     }
   };
-
   useEffect(() => {
     // Handle searchError separately and return early
     if (searchError) {
@@ -148,6 +154,15 @@ const AutoCompleteSearch = () => {
   
       return () => clearTimeout(timer);
     }
+
+    if (isFallbackToDefaultCity) {
+      const timer = setTimeout(() => {
+        setIsFallbackToDefaultCity(false); // Hide the message after 5 seconds
+      }, 5000); // 5 seconds
+  
+      return () => clearTimeout(timer);
+    }
+
   
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('recentSearches');
@@ -160,7 +175,7 @@ const AutoCompleteSearch = () => {
         }
       }
     }
-  }, [fetchWeather, searchError, isLocationDenied]);
+  }, [fetchWeather, searchError, isLocationDenied, isFallbackToDefaultCity]);
 
   const addToRecentSearches = (locationName: string) => {
     setRecentSearches(prevSearches => {
@@ -380,11 +395,11 @@ const AutoCompleteSearch = () => {
   </div>
 )}
 
-{/* {isIPRateLimited && cachedCity && (
-  <div className="px-4 mt-2 text-amber-500 text-sm transition-opacity duration-300">
-    IP geolocation rate limited. Using last known location: {cachedCity}
+{isFallbackToDefaultCity && (
+  <div className="px-4 mt-2 text-gray-400 text-sm transition-opacity duration-300">
+    Too many rapid requests. Defaulting to New York.
   </div>
-)} */}
+)}
 
 {isRateLimited && (
     <div className="px-4 mt-2 text-gray-400 text-sm transition-opacity duration-300">
