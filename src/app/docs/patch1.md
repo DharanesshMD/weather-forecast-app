@@ -65,3 +65,7 @@ useEffect(() => {
 
 Summary
 By using localStorage to store the theme state and applying the theme class immediately when the component mounts, we ensure that the theme is persistent across page reloads and consistent throughout the user's session. This approach prevents any flicker when the theme changes, providing a seamless user experience.
+
+### About the Weather Result
+
+When the site loads, it will initially prompt the user to enable location services. If the user denies location access or if there is no response, the site will automatically display the location based on the user's IP address.
