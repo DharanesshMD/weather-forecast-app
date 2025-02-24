@@ -20,7 +20,7 @@ const OfflineFallback = () => {
             Retry Connection
           </button>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Weather data will be available once you&aposre back online
+            Weather data will be available once you are back online
           </p>
         </div>
       </div>
