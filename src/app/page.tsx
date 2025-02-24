@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslation } from 'next-i18next';
 import { fetchDefaultWeather, fetchWeather } from './services/weather';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import gsap from 'gsap';
@@ -13,14 +12,15 @@ const Map = lazy(() => import('./components/Map'));
 
 const Home = () => {
   const [isOnline, setIsOnline] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Initialize isDarkMode based on localStorage value
-    const storedTheme = localStorage.getItem('theme');
-    return storedTheme === 'dark' || storedTheme === null; // Default to dark mode if no theme is stored
-  });
-  // const { t } = useTranslation('common');
+  const [isDarkMode, setIsDarkMode] = useState(false); // Initialize with a default value
 
   useEffect(() => {
+    // Set initial dark mode based on localStorage value
+    if (typeof window !== 'undefined') {
+      const storedTheme = localStorage.getItem('theme');
+      setIsDarkMode(storedTheme === 'dark' || storedTheme === null); // Default to dark mode if no theme is stored
+    }
+
     // Set initial dark mode class based on the initial state
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -39,7 +39,9 @@ const Home = () => {
 
   useEffect(() => {
     // Save theme state to localStorage whenever it changes
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    }
 
     // Set initial dark mode class
     if (isDarkMode) {
